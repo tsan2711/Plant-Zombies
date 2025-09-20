@@ -6,7 +6,7 @@ using PvZ.Managers;
 
 namespace PvZ.Plants
 {
-    public class PlantController : MonoBehaviour, IEntity, IProjectileLauncher
+    public class PlantController : MonoBehaviour, IEntity, IProjectileLauncher, IDamageDealer
     {
         [Header("Plant Configuration")]
         [SerializeField] private PlantData plantData;
@@ -26,6 +26,11 @@ namespace PvZ.Plants
         // IProjectileLauncher Properties  
         public bool CanLaunch => Time.time >= lastAttackTime + (1f / plantData.attackSpeed);
         public float LaunchCooldown => 1f / plantData.attackSpeed;
+        
+        // IDamageDealer Properties
+        public float Damage => plantData.damage;
+        public DamageType DamageType => DamageType.Normal;
+        IEntity IDamageDealer.Owner => this;
         
         // Private Fields
         private float lastAttackTime;

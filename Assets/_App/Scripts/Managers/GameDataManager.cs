@@ -10,6 +10,28 @@ namespace PvZ.Managers
     [CreateAssetMenu(fileName = "Game Data Manager", menuName = "PvZ/Managers/Game Data")]
     public class GameDataManager : ScriptableObject
     {
+        // Singleton instance
+        private static GameDataManager _instance;
+        public static GameDataManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = Resources.Load<GameDataManager>("GameDataManager");
+                    if (_instance == null)
+                    {
+                        Debug.LogError("GameDataManager not found in Resources folder! Please create one or move existing one to Resources folder.");
+                    }
+                    else
+                    {
+                        _instance.Initialize();
+                    }
+                }
+                return _instance;
+            }
+        }
+        
         [Header("Plants")]
         public PlantData[] allPlants;
         
@@ -35,6 +57,30 @@ namespace PvZ.Managers
         private Dictionary<string, ProjectileEffectData> effectLookup;
         
         private bool isInitialized = false;
+        
+        #region Singleton Management
+        
+        /// <summary>
+        /// Set the singleton instance manually (useful for testing or custom setup)
+        /// </summary>
+        public static void SetInstance(GameDataManager instance)
+        {
+            _instance = instance;
+            if (_instance != null)
+            {
+                _instance.Initialize();
+            }
+        }
+        
+        /// <summary>
+        /// Reset the singleton instance (useful for testing or when reloading)
+        /// </summary>
+        public static void ResetInstance()
+        {
+            _instance = null;
+        }
+        
+        #endregion
         
         #region Initialization
         
@@ -300,7 +346,7 @@ namespace PvZ.Managers
             if (!isInitialized) Initialize();
             
             var validPlants = allPlants?.Where(p => p != null && p.isUnlocked);
-            return validPlants?.Any() == true ? validPlants.Average(p => p.cost) : 0f;
+            return validPlants?.Any() == true ? (float)validPlants.Average(p => p.cost) : 0f;
         }
         
         #endregion

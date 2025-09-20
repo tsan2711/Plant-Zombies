@@ -109,7 +109,7 @@ namespace PvZ.Projectiles
                 switch (projectileData.movementType)
                 {
                     case ProjectileMovementType.Straight:
-                        rb2d.velocity = Direction * projectileData.speed;
+                        rb2d.linearVelocity = Direction * projectileData.speed;
                         break;
                     case ProjectileMovementType.Arc:
                         SetupArcMovement();
@@ -118,7 +118,7 @@ namespace PvZ.Projectiles
                         SetupLobbedMovement();
                         break;
                     default:
-                        rb2d.velocity = Direction * projectileData.speed;
+                        rb2d.linearVelocity = Direction * projectileData.speed;
                         break;
                 }
             }
@@ -129,7 +129,7 @@ namespace PvZ.Projectiles
             // Calculate arc trajectory
             Vector3 velocity = Direction * projectileData.speed;
             velocity.y += 5f; // Add upward velocity for arc
-            rb2d.velocity = velocity;
+            rb2d.linearVelocity = velocity;
         }
         
         private void SetupLobbedMovement()
@@ -137,7 +137,7 @@ namespace PvZ.Projectiles
             // High arc trajectory
             Vector3 velocity = Direction * projectileData.speed * 0.7f;
             velocity.y += 8f; // Higher upward velocity
-            rb2d.velocity = velocity;
+            rb2d.linearVelocity = velocity;
         }
         
         private void SetupVisual()
@@ -185,13 +185,13 @@ namespace PvZ.Projectiles
             Vector3 directionToTarget = (targetPosition - transform.position).normalized;
             
             // Gradually turn towards target
-            Vector3 currentVelocity = rb2d.velocity;
+            Vector3 currentVelocity = rb2d.linearVelocity;
             Vector3 targetVelocity = directionToTarget * projectileData.speed;
             
             Vector3 newVelocity = Vector3.Lerp(currentVelocity, targetVelocity, 
                 projectileData.homingStrength * Time.deltaTime);
             
-            rb2d.velocity = newVelocity;
+            rb2d.linearVelocity = newVelocity;
             Direction = newVelocity.normalized;
         }
         
@@ -204,7 +204,7 @@ namespace PvZ.Projectiles
                 // Return to owner
                 Vector3 ownerPosition = Owner?.Position ?? initialPosition;
                 Vector3 returnDirection = (ownerPosition - transform.position).normalized;
-                rb2d.velocity = returnDirection * projectileData.speed;
+                rb2d.linearVelocity = returnDirection * projectileData.speed;
             }
         }
         
@@ -220,9 +220,9 @@ namespace PvZ.Projectiles
         
         private void UpdateRotation()
         {
-            if (projectileData.rotateTowardsDirection && rb2d.velocity.magnitude > 0.1f)
+            if (projectileData.rotateTowardsDirection && rb2d.linearVelocity.magnitude > 0.1f)
             {
-                Vector3 velocity = rb2d.velocity;
+                Vector3 velocity = rb2d.linearVelocity;
                 float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
             }
@@ -354,14 +354,14 @@ namespace PvZ.Projectiles
             // Simple bounce logic - reverse Y velocity for ground, X velocity for walls
             if (other.CompareTag("Ground"))
             {
-                rb2d.velocity = new Vector2(rb2d.velocity.x, -rb2d.velocity.y);
+                rb2d.linearVelocity = new Vector2(rb2d.linearVelocity.x, -rb2d.linearVelocity.y);
             }
             else if (other.CompareTag("Wall"))
             {
-                rb2d.velocity = new Vector2(-rb2d.velocity.x, rb2d.velocity.y);
+                rb2d.linearVelocity = new Vector2(-rb2d.linearVelocity.x, rb2d.linearVelocity.y);
             }
             
-            Direction = rb2d.velocity.normalized;
+            Direction = rb2d.linearVelocity.normalized;
         }
         
         private bool ShouldDestroyOnHit(Collider2D other)

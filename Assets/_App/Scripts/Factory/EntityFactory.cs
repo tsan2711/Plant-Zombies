@@ -4,6 +4,9 @@ using PvZ.Plants;
 using PvZ.Zombies;
 using PvZ.Projectiles;
 using PvZ.Managers;
+using PvZ.Events;
+using PvZ.Factory;
+
 
 namespace PvZ.Factory
 {
@@ -137,7 +140,8 @@ namespace PvZ.Factory
                 projectile.Initialize(projectileData, position, direction, owner);
                 
                 // Raise event
-                GameEventManager.Instance?.RaiseProjectileFired(projectile);
+                if (projectile is IEntity entity)
+                    GameEventManager.Instance?.RaiseProjectileFired(entity);
                 
                 return projectile;
             }
@@ -182,7 +186,8 @@ namespace PvZ.Factory
             controller.Initialize(projectileData, position, direction, owner);
             
             // Register with managers
-            EntityManager.Instance?.RegisterEntity(controller);
+            if (controller is IEntity entity)
+                EntityManager.Instance?.RegisterEntity(entity);
             
             Debug.Log($"Created projectile directly: {projectileData.projectileID}");
             return controller;

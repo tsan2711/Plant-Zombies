@@ -442,14 +442,14 @@ namespace PvZ.Zombies
         
         public void DropRewards()
         {
-            // Drop points
-            ScoreManager.Instance?.AddScore(zombieData.pointValue);
+            // // Drop points
+            // ScoreManager.Instance?.AddScore(zombieData.pointValue);
             
-            // Drop sun
-            if (Random.value <= zombieData.sunDropChance)
-            {
-                SunManager.Instance?.DropSun(transform.position, zombieData.sunDropAmount);
-            }
+            // // Drop sun
+            // if (Random.value <= zombieData.sunDropChance)
+            // {
+            //     SunManager.Instance?.DropSun(transform.position, zombieData.sunDropAmount);
+            // }
         }
         
         #endregion

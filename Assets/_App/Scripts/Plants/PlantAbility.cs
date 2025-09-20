@@ -159,7 +159,7 @@ namespace PvZ.Plants
                 var nearbyEnemies = FindNearbyZombies(effect.range);
                 foreach (var zombie in nearbyEnemies)
                 {
-                    zombie.TakeDamage(effect.value, Owner);
+                    zombie.TakeDamage(effect.value, Owner as IDamageDealer);
                 }
             }
         }
