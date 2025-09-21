@@ -17,7 +17,7 @@ namespace PvZ.Plants
         [SerializeField] private Transform[] launchPoints;
         
         // IEntity Properties
-        public string ID => plantData.plantID;
+        public string ID => plantData.plantID.ToString();
         public float Health { get; set; }
         public float MaxHealth => plantData.health;
         public Vector3 Position { get; set; }
@@ -136,12 +136,18 @@ namespace PvZ.Plants
         
         private void UpdateTargeting()
         {
-            if (!CanLaunch || plantData.projectileData == null) return;
+            if (plantData.projectileData == null) return;
             
             var target = FindTarget();
-            if (target != null)
+            if (target != null && CanLaunch)
             {
+                Debug.Log("Attacking target");
                 AttackTarget(target);
+            }
+            else if (target == null)
+            {
+                // No target found, ensure plant is in idle state
+                SetIdleState();
             }
         }
         
@@ -153,14 +159,13 @@ namespace PvZ.Plants
         
         private bool IsValidTarget(ITargetable target)
         {
-            // Check if target is in valid layer
             var targetEntity = target as MonoBehaviour;
             if (targetEntity == null) return false;
             
-            // Check ground/air attack capabilities
             bool isGroundTarget = targetEntity.CompareTag("GroundZombie");
             bool isAirTarget = targetEntity.CompareTag("AirZombie");
             
+
             return (plantData.canAttackGround && isGroundTarget) || 
                    (plantData.canAttackAir && isAirTarget);
         }
@@ -302,6 +307,14 @@ namespace PvZ.Plants
             if (animator != null)
             {
                 animator.SetTrigger("Attack");
+            }
+        }
+        
+        private void SetIdleState()
+        {
+            if (animator != null)
+            {
+                animator.SetTrigger("Idle");
             }
         }
         

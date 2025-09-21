@@ -54,7 +54,7 @@ namespace PvZ.Factory
             return controller;
         }
         
-        public static PlantController CreatePlant(string plantID, Vector3 position, Transform parent = null)
+        public static PlantController CreatePlant(AnimalID plantID, Vector3 position, Transform parent = null)
         {
             var plantData = GameDataManager.Instance?.GetPlant(plantID);
             if (plantData == null)
@@ -107,7 +107,7 @@ namespace PvZ.Factory
             return controller;
         }
         
-        public static ZombieController CreateZombie(string zombieID, Vector3 position, Transform parent = null)
+        public static ZombieController CreateZombie(ZombieID zombieID, Vector3 position, Transform parent = null)
         {
             var zombieData = GameDataManager.Instance?.GetZombie(zombieID);
             if (zombieData == null)
@@ -152,7 +152,7 @@ namespace PvZ.Factory
             }
         }
         
-        public static ProjectileController CreateProjectile(string projectileID, Vector3 position, Vector3 direction, IEntity owner)
+        public static ProjectileController CreateProjectile(ProjectileID projectileID, Vector3 position, Vector3 direction, IEntity owner)
         {
             var projectileData = GameDataManager.Instance?.GetProjectile(projectileID);
             if (projectileData == null)
@@ -313,7 +313,7 @@ namespace PvZ.Factory
         
         #region Validation
         
-        public static bool CanCreatePlant(string plantID, Vector3 position)
+        public static bool CanCreatePlant(AnimalID plantID, Vector3 position)
         {
             var plantData = GameDataManager.Instance?.GetPlant(plantID);
             if (plantData == null) return false;
@@ -324,7 +324,7 @@ namespace PvZ.Factory
             return true;
         }
         
-        public static bool CanCreateZombie(string zombieID, Vector3 position)
+        public static bool CanCreateZombie(ZombieID zombieID, Vector3 position)
         {
             var zombieData = GameDataManager.Instance?.GetZombie(zombieID);
             if (zombieData == null) return false;

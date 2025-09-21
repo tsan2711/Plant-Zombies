@@ -96,7 +96,7 @@ namespace PvZ.Projectiles
                 return null;
             }
             
-            string projectileID = projectileData.projectileID;
+            string projectileID = projectileData.projectileID.ToString();
             
             // Cache projectile data for future use
             if (!projectileDataCache.ContainsKey(projectileID))
@@ -142,7 +142,7 @@ namespace PvZ.Projectiles
                 return;
             }
             
-            string projectileID = data.projectileID;
+            string projectileID = data.projectileID.ToString();
             
             // Remove from active projectiles
             if (activeProjectiles.ContainsKey(projectileID))
@@ -163,7 +163,7 @@ namespace PvZ.Projectiles
         
         private void CreatePool(ProjectileData projectileData)
         {
-            string projectileID = projectileData.projectileID;
+            string projectileID = projectileData.projectileID.ToString();
             
             pools[projectileID] = new Queue<ProjectileController>();
             activeProjectiles[projectileID] = new List<ProjectileController>();
@@ -230,7 +230,7 @@ namespace PvZ.Projectiles
         {
             if (projectileData.prefab == null)
             {
-                Debug.LogError($"ProjectileData {projectileData.projectileID} has no prefab assigned!");
+                Debug.LogError($"ProjectileData {projectileData.projectileID.ToString()} has no prefab assigned!");
                 return null;
             }
             
@@ -244,7 +244,7 @@ namespace PvZ.Projectiles
             
             // Initially disable and add to pool
             projectileGO.SetActive(false);
-            pools[projectileData.projectileID].Enqueue(controller);
+            pools[projectileData.projectileID.ToString()].Enqueue(controller);
             
             totalCreated++;
             
@@ -288,7 +288,7 @@ namespace PvZ.Projectiles
         {
             if (projectileData == null) return;
             
-            string projectileID = projectileData.projectileID;
+            string projectileID = projectileData.projectileID.ToString();
             
             if (!pools.ContainsKey(projectileID))
             {

@@ -4,6 +4,7 @@ using System.Linq;
 using PvZ.Plants;
 using PvZ.Zombies;
 using PvZ.Projectiles;
+using PvZ.Core;
 
 namespace PvZ.Managers
 {
@@ -49,12 +50,12 @@ namespace PvZ.Managers
         public ProjectileEffectData[] allProjectileEffects;
         
         // Cached lookups for performance
-        private Dictionary<string, PlantData> plantLookup;
-        private Dictionary<string, ZombieData> zombieLookup;
-        private Dictionary<string, ProjectileData> projectileLookup;
+        private Dictionary<AnimalID, PlantData> plantLookup;
+        private Dictionary<ZombieID, ZombieData> zombieLookup;
+        private Dictionary<ProjectileID, ProjectileData> projectileLookup;
         private Dictionary<string, PlantAbilityData> plantAbilityLookup;
         private Dictionary<string, ZombieAbilityData> zombieAbilityLookup;
-        private Dictionary<string, ProjectileEffectData> effectLookup;
+        private Dictionary<EffectID, ProjectileEffectData> effectLookup;
         
         private bool isInitialized = false;
         
@@ -98,12 +99,12 @@ namespace PvZ.Managers
         private void BuildLookupDictionaries()
         {
             // Build plant lookup
-            plantLookup = new Dictionary<string, PlantData>();
+            plantLookup = new Dictionary<AnimalID, PlantData>();
             if (allPlants != null)
             {
                 foreach (var plant in allPlants)
                 {
-                    if (plant != null && !string.IsNullOrEmpty(plant.plantID))
+                    if (plant != null && plant.plantID != AnimalID.None)
                     {
                         plantLookup[plant.plantID] = plant;
                     }
@@ -111,12 +112,12 @@ namespace PvZ.Managers
             }
             
             // Build zombie lookup
-            zombieLookup = new Dictionary<string, ZombieData>();
+            zombieLookup = new Dictionary<ZombieID, ZombieData>();
             if (allZombies != null)
             {
                 foreach (var zombie in allZombies)
                 {
-                    if (zombie != null && !string.IsNullOrEmpty(zombie.zombieID))
+                    if (zombie != null && zombie.zombieID != ZombieID.None)
                     {
                         zombieLookup[zombie.zombieID] = zombie;
                     }
@@ -124,12 +125,12 @@ namespace PvZ.Managers
             }
             
             // Build projectile lookup
-            projectileLookup = new Dictionary<string, ProjectileData>();
+            projectileLookup = new Dictionary<ProjectileID, ProjectileData>();
             if (allProjectiles != null)
             {
                 foreach (var projectile in allProjectiles)
                 {
-                    if (projectile != null && !string.IsNullOrEmpty(projectile.projectileID))
+                    if (projectile != null && projectile.projectileID != ProjectileID.None)
                     {
                         projectileLookup[projectile.projectileID] = projectile;
                     }
@@ -162,12 +163,12 @@ namespace PvZ.Managers
             }
             
             // Build effect lookup
-            effectLookup = new Dictionary<string, ProjectileEffectData>();
+            effectLookup = new Dictionary<EffectID, ProjectileEffectData>();
             if (allProjectileEffects != null)
             {
                 foreach (var effect in allProjectileEffects)
                 {
-                    if (effect != null && !string.IsNullOrEmpty(effect.effectID))
+                    if (effect != null && effect.effectID != EffectID.None)
                     {
                         effectLookup[effect.effectID] = effect;
                     }
@@ -188,8 +189,8 @@ namespace PvZ.Managers
             {
                 if (plant == null) continue;
                 
-                if (string.IsNullOrEmpty(plant.plantID))
-                    Debug.LogWarning($"Plant {plant.name} has empty plantID!");
+                if (plant.plantID == AnimalID.None)
+                    Debug.LogWarning($"Plant {plant.name} has no plantID set!");
                 
                 if (plant.prefab == null)
                     Debug.LogWarning($"Plant {plant.plantID} has no prefab assigned!");
@@ -205,8 +206,8 @@ namespace PvZ.Managers
             {
                 if (zombie == null) continue;
                 
-                if (string.IsNullOrEmpty(zombie.zombieID))
-                    Debug.LogWarning($"Zombie {zombie.name} has empty zombieID!");
+                if (zombie.zombieID == ZombieID.None)
+                    Debug.LogWarning($"Zombie {zombie.name} has no zombieID set!");
                 
                 if (zombie.prefab == null)
                     Debug.LogWarning($"Zombie {zombie.zombieID} has no prefab assigned!");
@@ -219,8 +220,8 @@ namespace PvZ.Managers
             {
                 if (projectile == null) continue;
                 
-                if (string.IsNullOrEmpty(projectile.projectileID))
-                    Debug.LogWarning($"Projectile {projectile.name} has empty projectileID!");
+                if (projectile.projectileID == ProjectileID.None)
+                    Debug.LogWarning($"Projectile {projectile.name} has no projectileID set!");
                 
                 if (projectile.prefab == null)
                     Debug.LogWarning($"Projectile {projectile.projectileID} has no prefab assigned!");
@@ -231,7 +232,7 @@ namespace PvZ.Managers
         
         #region Data Retrieval
         
-        public PlantData GetPlant(string id)
+        public PlantData GetPlant(AnimalID id)
         {
             if (!isInitialized) Initialize();
             
@@ -242,7 +243,7 @@ namespace PvZ.Managers
             return plant;
         }
         
-        public ZombieData GetZombie(string id)
+        public ZombieData GetZombie(ZombieID id)
         {
             if (!isInitialized) Initialize();
             
@@ -253,7 +254,7 @@ namespace PvZ.Managers
             return zombie;
         }
         
-        public ProjectileData GetProjectile(string id)
+        public ProjectileData GetProjectile(ProjectileID id)
         {
             if (!isInitialized) Initialize();
             
@@ -280,7 +281,7 @@ namespace PvZ.Managers
             return ability;
         }
         
-        public ProjectileEffectData GetProjectileEffect(string id)
+        public ProjectileEffectData GetProjectileEffect(EffectID id)
         {
             if (!isInitialized) Initialize();
             
@@ -359,19 +360,19 @@ namespace PvZ.Managers
             Initialize();
         }
         
-        public bool HasPlant(string id)
+        public bool HasPlant(AnimalID id)
         {
             if (!isInitialized) Initialize();
             return plantLookup.ContainsKey(id);
         }
         
-        public bool HasZombie(string id)
+        public bool HasZombie(ZombieID id)
         {
             if (!isInitialized) Initialize();
             return zombieLookup.ContainsKey(id);
         }
         
-        public bool HasProjectile(string id)
+        public bool HasProjectile(ProjectileID id)
         {
             if (!isInitialized) Initialize();
             return projectileLookup.ContainsKey(id);

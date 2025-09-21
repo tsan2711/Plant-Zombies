@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f815a7949b3e24335887fb028063fa23, type: 3}
+  m_Name: Game Data Manager
+  m_EditorClassIdentifier: 
+  allPlants:
+  - {fileID: 11400000, guid: cb2114ea8ebe2467eb30db4ee640f5e4, type: 2}
+  allZombies:
+  - {fileID: 11400000, guid: 25f6ceae3a9184eee997b6c7178c36e1, type: 2}
+  allProjectiles:
+  - {fileID: 11400000, guid: ff87e641ef27a4209af6284019adefe8, type: 2}
+  allPlantAbilities: []
+  allZombieAbilities: []
+  allProjectileEffects: []

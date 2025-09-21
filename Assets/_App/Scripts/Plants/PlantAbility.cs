@@ -111,18 +111,18 @@ namespace PvZ.Plants
         
         private void ApplyEffect(AbilityEffectData effect)
         {
-            switch (effect.effectID.ToLower())
+            switch (effect.effectID)
             {
-                case "heal":
+                case EffectID.Heal:
                     ApplyHealEffect(effect);
                     break;
-                case "damage":
+                case EffectID.Damage:
                     ApplyDamageEffect(effect);
                     break;
-                case "speedboost":
+                case EffectID.SpeedBoost:
                     ApplySpeedBoostEffect(effect);
                     break;
-                case "shield":
+                case EffectID.Shield:
                     ApplyShieldEffect(effect);
                     break;
                 default:

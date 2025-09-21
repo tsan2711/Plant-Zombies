@@ -111,22 +111,19 @@ namespace PvZ.Zombies
         
         private void ApplyEffect(ZombieAbilityEffectData effect)
         {
-            switch (effect.effectID.ToLower())
+            switch (effect.effectID)
             {
-                case "heal":
+                case EffectID.Heal:
                     ApplyHealEffect(effect);
                     break;
-                case "damage":
+                case EffectID.Damage:
                     ApplyDamageEffect(effect);
                     break;
-                case "speedboost":
+                case EffectID.SpeedBoost:
                     ApplySpeedBoostEffect(effect);
                     break;
-                case "summon":
+                case EffectID.AttackBoost: // Thay thế summon
                     ApplySummonEffect(effect);
-                    break;
-                case "rage":
-                    ApplyRageEffect(effect);
                     break;
                 default:
                     Debug.LogWarning($"Unknown effect type: {effect.effectID}");

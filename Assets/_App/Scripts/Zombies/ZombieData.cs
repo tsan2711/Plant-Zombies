@@ -8,7 +8,7 @@ namespace PvZ.Zombies
     public class ZombieData : ScriptableObject
     {
         [Header("Basic Info")]
-        public string zombieID;
+        public ZombieID zombieID;
         public string displayName;
         [TextArea(2, 4)]
         public string description;
@@ -28,7 +28,6 @@ namespace PvZ.Zombies
         
         [Header("Special Properties")]
         public ZombieType zombieType;
-        public ZombieArmorData armor;
         public ZombieAbilityData[] abilities;
         public ProjectileData projectileData; // For shooting zombies
         

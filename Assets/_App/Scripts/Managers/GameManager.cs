@@ -74,13 +74,13 @@ namespace PvZ.Managers
             
             // Initialize other managers if not found
             if (entityManager == null)
-                entityManager = FindObjectOfType<EntityManager>();
+                entityManager = FindAnyObjectByType<EntityManager>();
             
             if (projectilePool == null)
-                projectilePool = FindObjectOfType<ProjectilePool>();
+                projectilePool = FindAnyObjectByType<ProjectilePool>();
             
             if (eventManager == null)
-                eventManager = FindObjectOfType<GameEventManager>();
+                eventManager = FindAnyObjectByType<GameEventManager>();
             
             Debug.Log("GameManager initialized successfully!");
         }
@@ -101,8 +101,6 @@ namespace PvZ.Managers
             ResetGameStatistics();
             
             eventManager?.RaiseGameStart();
-            
-            Debug.Log($"Game started with level: {currentLevel.levelName}");
         }
         
         public void PauseGame()
@@ -183,14 +181,15 @@ namespace PvZ.Managers
                 return;
             }
             
-            if (!levelConfig.ValidateConfiguration())
+            // Basic validation
+            if (levelConfig.waves == null || levelConfig.waves.Length == 0)
             {
-                Debug.LogError($"Cannot load level: Configuration validation failed for {levelConfig.levelName}");
+                Debug.LogError($"Cannot load level: No waves configured for {levelConfig.stage}");
                 return;
             }
             
             currentLevel = levelConfig;
-            Debug.Log($"Level loaded: {levelConfig.levelName}");
+            Debug.Log($"Level loaded: {levelConfig.stage}");
         }
         
         public void NextWave()
@@ -203,7 +202,7 @@ namespace PvZ.Managers
             if (waveData != null)
             {
                 eventManager?.RaiseWaveStart();
-                Debug.Log($"Wave {CurrentWave} started: {waveData.waveName}");
+                Debug.Log($"Wave {CurrentWave} started (Wave #{waveData.waveNumber})");
             }
             else
             {
@@ -218,7 +217,7 @@ namespace PvZ.Managers
             Debug.Log($"Wave {CurrentWave} completed!");
             
             // Check if this was the last wave
-            if (currentLevel != null && CurrentWave >= currentLevel.GetTotalWaves())
+            if (currentLevel != null && CurrentWave >= currentLevel.waves.Length)
             {
                 EndGame(true);
             }
@@ -244,11 +243,8 @@ namespace PvZ.Managers
         {
             Debug.Log("Zombie reached the house!");
             
-            // Check failure condition
-            if (currentLevel != null && currentLevel.failureCondition == LevelFailureCondition.ZombiesReachHouse)
-            {
-                EndGame(false);
-            }
+            // Simple failure condition - any zombie reaching house ends game
+            EndGame(false);
         }
         
         #endregion
@@ -271,7 +267,7 @@ namespace PvZ.Managers
                 zombiesKilled = ZombiesKilled,
                 plantsPlanted = PlantsPlanted,
                 gameTime = GameTime,
-                currentLevel = currentLevel?.levelName ?? "Unknown"
+                currentLevel = currentLevel?.stage.ToString() ?? "Unknown"
             };
         }
         

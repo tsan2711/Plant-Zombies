@@ -28,7 +28,7 @@ namespace PvZ.Plants
     [System.Serializable]
     public class AbilityEffectData
     {
-        public string effectID;
+        public EffectID effectID;
         public float value;
         public float range;
         public bool affectsSelf;

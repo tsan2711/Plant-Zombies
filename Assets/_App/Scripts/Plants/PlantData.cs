@@ -8,7 +8,7 @@ namespace PvZ.Plants
     public class PlantData : ScriptableObject
     {
         [Header("Basic Info")]
-        public string plantID;
+        public AnimalID plantID;
         public string displayName;
         [TextArea(2, 4)]
         public string description;
@@ -22,11 +22,17 @@ namespace PvZ.Plants
         public float attackSpeed;
         public float range;
         
+        [Header("Detection Settings")]
+        [Tooltip("Number of rows this plant can detect zombies:\n" +
+                 "0 = Only current row\n" +
+                 "1 = Current row + 1 row before/after (total 3 rows)\n" +
+                 "2 = Current row + 2 rows before/after (total 5 rows)")]
+        public int detectionRows = 1;
+        
         [Header("Projectile Settings")]
         public ProjectileData projectileData;
         public int projectileCount = 1;
         public float projectileSpread = 0f;
-        public Transform[] launchPoints;
         
         [Header("Special Abilities")]
         public PlantAbilityData[] abilities;

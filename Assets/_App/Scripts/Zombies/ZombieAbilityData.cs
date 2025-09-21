@@ -28,7 +28,7 @@ namespace PvZ.Zombies
     [System.Serializable]
     public class ZombieAbilityEffectData
     {
-        public string effectID;
+        public EffectID effectID;
         public float value;
         public float range;
         public bool affectsSelf;

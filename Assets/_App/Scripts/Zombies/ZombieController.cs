@@ -6,6 +6,10 @@ using PvZ.Managers;
 
 namespace PvZ.Zombies
 {
+    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(AudioSource))]
     public class ZombieController : MonoBehaviour, IEntity, ITargetable, IDamageDealer
     {
         [Header("Zombie Configuration")]
@@ -14,13 +18,13 @@ namespace PvZ.Zombies
         [Header("Components")]
         [SerializeField] private Animator animator;
         [SerializeField] private AudioSource audioSource;
-        [SerializeField] private Rigidbody2D rb2d;
-        [SerializeField] private Collider2D col2d;
+        [SerializeField] private Rigidbody rb;
+        [SerializeField] private Collider col;
         
         // IEntity Properties
-        public string ID => zombieData.zombieID;
+        public string ID => zombieData.zombieID.ToString();
         public float Health { get; set; }
-        public float MaxHealth => zombieData.health + (currentArmor?.durability ?? 0);
+        public float MaxHealth => zombieData.health;
         public Vector3 Position { get; set; }
         public bool IsActive { get; set; }
         
@@ -32,17 +36,16 @@ namespace PvZ.Zombies
         // Public Properties
         public ZombieData ZombieData => zombieData;
         public ZombieStateMachine StateMachine { get; private set; }
-        public ZombieArmorData CurrentArmor => currentArmor;
-        public float CurrentArmorDurability => currentArmorDurability;
         
         // Private Fields
-        private ZombieArmorData currentArmor;
-        private float currentArmorDurability;
         private List<ZombieAbility> activeAbilities;
         private EntityManager entityManager;
         private float groanTimer;
         private float groanInterval = 3f;
         private bool hasReachedHouse = false;
+        
+        // Events
+        public System.Action OnZombieDied;
         
         #region Unity Lifecycle
         
@@ -86,11 +89,11 @@ namespace PvZ.Zombies
             if (audioSource == null)
                 audioSource = GetComponent<AudioSource>();
             
-            if (rb2d == null)
-                rb2d = GetComponent<Rigidbody2D>();
+            if (rb == null)
+                rb = GetComponent<Rigidbody>();
             
-            if (col2d == null)
-                col2d = GetComponent<Collider2D>();
+            if (col == null)
+                col = GetComponent<Collider>();
         }
         
         private void InitializeStateMachine()
@@ -117,13 +120,6 @@ namespace PvZ.Zombies
             Health = zombieData.health;
             Position = transform.position;
             IsActive = true;
-            
-            // Initialize armor
-            if (zombieData.armor != null)
-            {
-                currentArmor = zombieData.armor;
-                currentArmorDurability = currentArmor.durability;
-            }
             
             // Set animator controller
             if (animator != null && zombieData.animatorController != null)
@@ -217,7 +213,7 @@ namespace PvZ.Zombies
         public IEntity FindNearbyPlant()
         {
             float detectionRange = zombieData.attackRange;
-            var colliders = Physics2D.OverlapCircleAll(transform.position, detectionRange);
+            var colliders = Physics.OverlapSphere(transform.position, detectionRange);
             
             foreach (var collider in colliders)
             {
@@ -234,7 +230,7 @@ namespace PvZ.Zombies
         public ITargetable FindAttackTarget()
         {
             float attackRange = zombieData.attackRange;
-            var colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+            var colliders = Physics.OverlapSphere(transform.position, attackRange);
             
             foreach (var collider in colliders)
             {
@@ -274,26 +270,7 @@ namespace PvZ.Zombies
         {
             if (!IsActive) return;
             
-            float actualDamage = CalculateActualDamage(damage, dealer.DamageType);
-            
-            // Apply damage to armor first
-            if (currentArmor != null && currentArmorDurability > 0)
-            {
-                float armorDamage = actualDamage * (1f - currentArmor.damageReduction);
-                currentArmorDurability -= armorDamage;
-                
-                if (currentArmorDurability <= 0)
-                {
-                    BreakArmor();
-                    float remainingDamage = -currentArmorDurability;
-                    Health -= remainingDamage;
-                }
-            }
-            else
-            {
-                Health -= actualDamage;
-            }
-            
+            Health -= damage;
             Health = Mathf.Max(0, Health);
             
             // Trigger on damage abilities
@@ -305,45 +282,6 @@ namespace PvZ.Zombies
             }
         }
         
-        private float CalculateActualDamage(float baseDamage, DamageType damageType)
-        {
-            if (currentArmor == null) return baseDamage;
-            
-            // Check resistances and vulnerabilities
-            foreach (var resistantType in currentArmor.resistantTo)
-            {
-                if (resistantType == damageType)
-                {
-                    return baseDamage * 0.5f; // 50% resistance
-                }
-            }
-            
-            foreach (var vulnerableType in currentArmor.vulnerableTo)
-            {
-                if (vulnerableType == damageType)
-                {
-                    return baseDamage * 2f; // 200% damage when vulnerable
-                }
-            }
-            
-            return baseDamage;
-        }
-        
-        private void BreakArmor()
-        {
-            if (currentArmor == null) return;
-            
-            // Play break effect
-            if (currentArmor.breakEffectPrefab != null)
-            {
-                Instantiate(currentArmor.breakEffectPrefab, transform.position, Quaternion.identity);
-            }
-            
-            PlaySound(currentArmor.breakSound);
-            
-            currentArmor = null;
-            currentArmorDurability = 0;
-        }
         
         public void Die()
         {
@@ -351,6 +289,9 @@ namespace PvZ.Zombies
             
             IsActive = false;
             StateMachine.ChangeState(ZombieState.Dying);
+            
+            // Trigger death event for spawner
+            OnZombieDied?.Invoke();
         }
         
         #endregion
@@ -471,6 +412,12 @@ namespace PvZ.Zombies
             InitializeZombie();
         }
         
+        public void Initialize(ZombieData data)
+        {
+            zombieData = data;
+            InitializeZombie();
+        }
+        
         #endregion
         
         #region Debug
@@ -485,5 +432,20 @@ namespace PvZ.Zombies
         }
         
         #endregion
+
+        void OnValidate()
+        {
+            if (rb == null)
+                rb = GetComponent<Rigidbody>();
+
+            if (col == null)
+                col = GetComponent<Collider>();
+
+            if (animator == null)
+                animator = GetComponent<Animator>();
+
+            if (audioSource == null)
+                audioSource = GetComponent<AudioSource>();
+        }
     }
 }

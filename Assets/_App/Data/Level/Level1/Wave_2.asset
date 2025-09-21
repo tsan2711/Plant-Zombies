@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 932fe768b5a98479990e640a6a52d623, type: 3}
+  m_Name: Wave_2
+  m_EditorClassIdentifier: 
+  waveNumber: 0
+  waveName: 
+  description: 
+  startDelay: 5
+  duration: 60
+  isEndlessWave: 0
+  zombieSpawns: []
+  spawnRate: 1
+  maxConcurrentZombies: 10
+  completionCondition: 0
+  survivalTime: 0
+  sunReward: 50
+  scoreReward: 100
