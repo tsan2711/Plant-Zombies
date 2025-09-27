@@ -12,16 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 932fe768b5a98479990e640a6a52d623, type: 3}
   m_Name: Wave_2
   m_EditorClassIdentifier: 
-  waveNumber: 0
-  waveName: 
-  description: 
+  waveNumber: 1
   startDelay: 5
   duration: 60
-  isEndlessWave: 0
-  zombieSpawns: []
+  zombieSpawns:
+  - zombieData: {fileID: 11400000, guid: 25f6ceae3a9184eee997b6c7178c36e1, type: 2}
+    count: 2
+    spawnProbability: 1
   spawnRate: 1
-  maxConcurrentZombies: 10
   completionCondition: 0
-  survivalTime: 0
   sunReward: 50
   scoreReward: 100

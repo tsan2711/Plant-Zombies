@@ -5,6 +5,8 @@ using PvZ.Factory;
 using PvZ.Plants;
 using PvZ.Zombies;
 using PvZ.Projectiles;
+using PvZ.Placement;
+using PvZ.Core;
 
 namespace PvZ.Managers
 {
@@ -24,6 +26,7 @@ namespace PvZ.Managers
         [SerializeField] private EntityManager entityManager;
         [SerializeField] private ProjectilePool projectilePool;
         [SerializeField] private GameEventManager eventManager;
+        [SerializeField] private PlantPlacementController plantPlacementController;
         
         [Header("Game State")]
         [SerializeField] private GameState currentState = GameState.MainMenu;
@@ -34,6 +37,11 @@ namespace PvZ.Managers
         public int ZombiesKilled { get; private set; } = 0;
         public int PlantsPlanted { get; private set; } = 0;
         public float GameTime { get; private set; } = 0f;
+        
+        // Resource System
+        [Header("Resources")]
+        [SerializeField] private int startingSun = 50;
+        public int CurrentSun { get; private set; } = 50;
         
         #region Unity Lifecycle
         
@@ -82,8 +90,54 @@ namespace PvZ.Managers
             if (eventManager == null)
                 eventManager = FindAnyObjectByType<GameEventManager>();
             
+            if (plantPlacementController == null)
+                plantPlacementController = FindAnyObjectByType<PlantPlacementController>();
+            
             Debug.Log("GameManager initialized successfully!");
         }
+        
+        #endregion
+        
+        #region Game Data Access
+        
+        /// <summary>
+        /// Get the GameDataManager instance
+        /// </summary>
+        public GameDataManager GetGameData()
+        {
+            if (gameDataManager == null)
+            {
+                Debug.LogError("GameDataManager is not assigned to GameManager!");
+            }
+            return gameDataManager;
+        }
+        
+        // Convenience methods for common data access
+        public PlantData GetPlant(AnimalID id) => gameDataManager?.GetPlant(id);
+        public ZombieData GetZombie(ZombieID id) => gameDataManager?.GetZombie(id);
+        public ProjectileData GetProjectile(ProjectileID id) => gameDataManager?.GetProjectile(id);
+        public PlantAbilityData GetPlantAbility(string id) => gameDataManager?.GetPlantAbility(id);
+        public ZombieAbilityData GetZombieAbility(string id) => gameDataManager?.GetZombieAbility(id);
+        public ProjectileEffectData GetProjectileEffect(EffectID id) => gameDataManager?.GetProjectileEffect(id);
+        
+        // Filtered queries
+        public PlantData[] GetPlantsByType(PvZ.Core.PlantType plantType) => gameDataManager?.GetPlantsByType(plantType);
+        public ZombieData[] GetZombiesByType(PvZ.Core.ZombieType zombieType) => gameDataManager?.GetZombiesByType(zombieType);
+        public PlantData[] GetUnlockedPlants() => gameDataManager?.GetUnlockedPlants();
+        public ZombieData[] GetZombiesForWave(int waveNumber) => gameDataManager?.GetZombiesForWave(waveNumber);
+        public PlantData[] GetPlantsWithCost(int maxCost) => gameDataManager?.GetPlantsWithCost(maxCost);
+        
+        // Statistics
+        public int GetTotalPlantsCount() => gameDataManager?.GetTotalPlantsCount() ?? 0;
+        public int GetTotalZombiesCount() => gameDataManager?.GetTotalZombiesCount() ?? 0;
+        public int GetTotalProjectilesCount() => gameDataManager?.GetTotalProjectilesCount() ?? 0;
+        public int GetUnlockedPlantsCount() => gameDataManager?.GetUnlockedPlantsCount() ?? 0;
+        public float GetAveragePlantCost() => gameDataManager?.GetAveragePlantCost() ?? 0f;
+        
+        // Data validation
+        public bool HasPlant(AnimalID id) => gameDataManager?.HasPlant(id) ?? false;
+        public bool HasZombie(ZombieID id) => gameDataManager?.HasZombie(id) ?? false;
+        public bool HasProjectile(ProjectileID id) => gameDataManager?.HasProjectile(id) ?? false;
         
         #endregion
         
@@ -99,6 +153,7 @@ namespace PvZ.Managers
             
             ChangeGameState(GameState.Playing);
             ResetGameStatistics();
+            InitializeResources();
             
             eventManager?.RaiseGameStart();
         }
@@ -249,6 +304,75 @@ namespace PvZ.Managers
         
         #endregion
         
+        #region Resource Management
+        
+        private void InitializeResources()
+        {
+            CurrentSun = startingSun;
+        }
+        
+        public bool CanAffordPlant(int cost)
+        {
+            return CurrentSun >= cost;
+        }
+        
+        public bool SpendSun(int amount)
+        {
+            if (CurrentSun >= amount)
+            {
+                CurrentSun -= amount;
+                Debug.Log($"Spent {amount} sun. Remaining: {CurrentSun}");
+                return true;
+            }
+            
+            Debug.Log($"Not enough sun to spend {amount}. Current: {CurrentSun}");
+            return false;
+        }
+        
+        public void AddSun(int amount)
+        {
+            CurrentSun += amount;
+            Debug.Log($"Added {amount} sun. Total: {CurrentSun}");
+        }
+        
+        #endregion
+        
+        #region Plant Placement
+        
+        public bool TryPlacePlant(PlantData plantData)
+        {
+            if (plantData == null)
+            {
+                Debug.LogError("Cannot place plant: PlantData is null");
+                return false;
+            }
+            
+            if (!CanAffordPlant(plantData.cost))
+            {
+                Debug.Log($"Cannot afford plant {plantData.displayName} (Cost: {plantData.cost}, Current: {CurrentSun})");
+                return false;
+            }
+            
+            // Placement sẽ được xử lý qua PlantPlacementController và GroundPlantContainer
+            // Chỉ cần kiểm tra resources ở đây
+            Debug.Log($"Plant {plantData.displayName} is ready to be placed. Use PlantPlacementController to place it.");
+            return true;
+        }
+        
+        public void SelectPlantForPlacement(PlantData plantData)
+        {
+            if (plantPlacementController != null)
+            {
+                plantPlacementController.SelectPlant(plantData);
+            }
+            else
+            {
+                Debug.LogError("PlantPlacementController not found!");
+            }
+        }
+        
+        #endregion
+        
         #region Statistics
         
         private void ResetGameStatistics()
@@ -279,6 +403,7 @@ namespace PvZ.Managers
         public bool IsPaused => isPaused;
         public LevelConfiguration CurrentLevel => currentLevel;
         public GameDataManager GameData => gameDataManager;
+        public PlantPlacementController PlacementController => plantPlacementController;
         
         #endregion
         

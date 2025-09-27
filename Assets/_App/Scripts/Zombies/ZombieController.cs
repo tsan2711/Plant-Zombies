@@ -104,15 +104,7 @@ namespace PvZ.Zombies
         private void InitializeAbilities()
         {
             activeAbilities = new List<ZombieAbility>();
-            
-            if (zombieData.abilities != null)
-            {
-                foreach (var abilityData in zombieData.abilities)
-                {
-                    var ability = new ZombieAbility(abilityData, this);
-                    activeAbilities.Add(ability);
-                }
-            }
+            // Abilities removed from ZombieData for simplification
         }
         
         private void InitializeZombie()
@@ -121,11 +113,7 @@ namespace PvZ.Zombies
             Position = transform.position;
             IsActive = true;
             
-            // Set animator controller
-            if (animator != null && zombieData.animatorController != null)
-            {
-                animator.runtimeAnimatorController = zombieData.animatorController;
-            }
+            // Animator controller removed for simplification - use default on prefab
             
             // Start state machine
             StateMachine.Start(ZombieState.Walking);
@@ -184,7 +172,7 @@ namespace PvZ.Zombies
         
         public void MoveForward()
         {
-            Vector3 moveDirection = Vector3.left; // Zombies move left towards house
+            Vector3 moveDirection = Vector3.forward; // Zombies move left towards house
             float moveDistance = zombieData.moveSpeed * Time.deltaTime;
             
             transform.Translate(moveDirection * moveDistance);
@@ -212,7 +200,7 @@ namespace PvZ.Zombies
         
         public IEntity FindNearbyPlant()
         {
-            float detectionRange = zombieData.attackRange;
+            float detectionRange = 1.5f; // Default attack range
             var colliders = Physics.OverlapSphere(transform.position, detectionRange);
             
             foreach (var collider in colliders)
@@ -229,7 +217,7 @@ namespace PvZ.Zombies
         
         public ITargetable FindAttackTarget()
         {
-            float attackRange = zombieData.attackRange;
+            float attackRange = 1.5f; // Default attack range
             var colliders = Physics.OverlapSphere(transform.position, attackRange);
             
             foreach (var collider in colliders)
@@ -246,20 +234,8 @@ namespace PvZ.Zombies
         
         public void LaunchProjectile(ITargetable target)
         {
-            if (zombieData.projectileData == null) return;
-            
-            Vector3 direction = (target.GetTargetPosition() - transform.position).normalized;
-            
-            if (ProjectilePool.Instance != null)
-            {
-                var projectile = ProjectilePool.Instance.GetProjectile(zombieData.projectileData);
-                if (projectile != null)
-                {
-                    projectile.Initialize(zombieData.projectileData, transform.position, direction, this);
-                }
-            }
-            
-            PlaySound(zombieData.attackSound);
+            // Projectile functionality removed for simplification
+            // Most zombies use melee attacks
         }
         
         #endregion
@@ -270,6 +246,7 @@ namespace PvZ.Zombies
         {
             if (!IsActive) return;
             
+            Debug.Log($"[DEBUG] {name} took {damage} damage. Health: {Health} -> {Health - damage}");
             Health -= damage;
             Health = Mathf.Max(0, Health);
             
@@ -278,6 +255,7 @@ namespace PvZ.Zombies
             
             if (Health <= 0)
             {
+                Debug.Log($"[DEBUG] {name} health reached 0, calling Die()");
                 Die();
             }
         }
@@ -287,10 +265,12 @@ namespace PvZ.Zombies
         {
             if (!IsActive) return;
             
+            Debug.Log($"[DEBUG] Zombie {name} is dying!");
             IsActive = false;
             StateMachine.ChangeState(ZombieState.Dying);
             
             // Trigger death event for spawner
+            Debug.Log($"[DEBUG] Invoking OnZombieDied event for {name}");
             OnZombieDied?.Invoke();
         }
         
@@ -337,21 +317,17 @@ namespace PvZ.Zombies
         
         private void PlayGroanSound()
         {
-            if (zombieData.groanSounds != null && zombieData.groanSounds.Length > 0)
-            {
-                var randomGroan = zombieData.groanSounds[Random.Range(0, zombieData.groanSounds.Length)];
-                PlaySound(randomGroan);
-            }
+            // Audio functionality simplified - can be handled by separate audio manager
         }
         
         public void PlayEatSound()
         {
-            PlaySound(zombieData.eatSound);
+            // Audio functionality simplified
         }
         
         public void PlayDeathSound()
         {
-            PlaySound(zombieData.deathSound);
+            // Audio functionality simplified
         }
         
         private void PlaySound(AudioClip clip)
@@ -383,14 +359,7 @@ namespace PvZ.Zombies
         
         public void DropRewards()
         {
-            // // Drop points
-            // ScoreManager.Instance?.AddScore(zombieData.pointValue);
-            
-            // // Drop sun
-            // if (Random.value <= zombieData.sunDropChance)
-            // {
-            //     SunManager.Instance?.DropSun(transform.position, zombieData.sunDropAmount);
-            // }
+            // Death rewards simplified - can be handled by game managers
         }
         
         #endregion
@@ -428,7 +397,7 @@ namespace PvZ.Zombies
             
             // Draw attack range
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, zombieData.attackRange);
+            Gizmos.DrawWireSphere(transform.position, 1.5f); // Default attack range
         }
         
         #endregion

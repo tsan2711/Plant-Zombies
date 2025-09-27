@@ -19,44 +19,58 @@ namespace PvZ.Factory
         
         public static PlantController CreatePlant(PlantData plantData, Vector3 position, Transform parent = null)
         {
+            Debug.Log($"EntityFactory.CreatePlant called with: {plantData?.displayName}");
+            
             if (plantData == null)
             {
                 Debug.LogError("Cannot create plant: PlantData is null!");
                 return null;
             }
             
+            Debug.Log($"PlantData prefab: {(plantData.prefab != null ? plantData.prefab.name : "NULL")}");
             if (plantData.prefab == null)
             {
                 Debug.LogError($"Cannot create plant {plantData.plantID}: Prefab is null!");
                 return null;
             }
             
-            // Instantiate the plant prefab
-            GameObject plantGO = Object.Instantiate(plantData.prefab, position, Quaternion.identity, parent);
-            
-            // Get or add PlantController
-            PlantController controller = plantGO.GetComponent<PlantController>();
-            if (controller == null)
+            try
             {
-                controller = plantGO.AddComponent<PlantController>();
+                Debug.Log($"Instantiating prefab at {position}");
+                // Instantiate the plant prefab
+                GameObject plantGO = Object.Instantiate(plantData.prefab, position, Quaternion.identity, parent);
+                Debug.Log($"Prefab instantiated: {plantGO.name}");
+                
+                // Get or add PlantController
+                PlantController controller = plantGO.GetComponent<PlantController>();
+                if (controller == null)
+                {
+                    Debug.Log("Adding PlantController component");
+                    controller = plantGO.AddComponent<PlantController>();
+                }
+                
+                // Set the plant data
+                controller.SetPlantData(plantData);
+                
+                // Register with managers
+                EntityManager.Instance?.RegisterEntity(controller);
+                
+                // Raise event
+                GameEventManager.Instance?.RaisePlantPlanted(controller);
+                
+                Debug.Log($"Plant creation complete: {controller.name}");
+                return controller;
             }
-            
-            // Set the plant data
-            controller.SetPlantData(plantData);
-            
-            // Register with managers
-            EntityManager.Instance?.RegisterEntity(controller);
-            
-            // Raise event
-            GameEventManager.Instance?.RaisePlantPlanted(controller);
-            
-            Debug.Log($"Created plant: {plantData.plantID} at {position}");
-            return controller;
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Exception creating plant: {e.Message}");
+                return null;
+            }
         }
         
         public static PlantController CreatePlant(AnimalID plantID, Vector3 position, Transform parent = null)
         {
-            var plantData = GameDataManager.Instance?.GetPlant(plantID);
+            var plantData = GameManager.Instance?.GetPlant(plantID);
             if (plantData == null)
             {
                 Debug.LogError($"Cannot create plant: PlantData for ID '{plantID}' not found!");
@@ -109,7 +123,7 @@ namespace PvZ.Factory
         
         public static ZombieController CreateZombie(ZombieID zombieID, Vector3 position, Transform parent = null)
         {
-            var zombieData = GameDataManager.Instance?.GetZombie(zombieID);
+            var zombieData = GameManager.Instance?.GetZombie(zombieID);
             if (zombieData == null)
             {
                 Debug.LogError($"Cannot create zombie: ZombieData for ID '{zombieID}' not found!");
@@ -154,7 +168,7 @@ namespace PvZ.Factory
         
         public static ProjectileController CreateProjectile(ProjectileID projectileID, Vector3 position, Vector3 direction, IEntity owner)
         {
-            var projectileData = GameDataManager.Instance?.GetProjectile(projectileID);
+            var projectileData = GameManager.Instance?.GetProjectile(projectileID);
             if (projectileData == null)
             {
                 Debug.LogError($"Cannot create projectile: ProjectileData for ID '{projectileID}' not found!");
@@ -315,7 +329,7 @@ namespace PvZ.Factory
         
         public static bool CanCreatePlant(AnimalID plantID, Vector3 position)
         {
-            var plantData = GameDataManager.Instance?.GetPlant(plantID);
+            var plantData = GameManager.Instance?.GetPlant(plantID);
             if (plantData == null) return false;
             
             // Add position validation logic
@@ -326,7 +340,7 @@ namespace PvZ.Factory
         
         public static bool CanCreateZombie(ZombieID zombieID, Vector3 position)
         {
-            var zombieData = GameDataManager.Instance?.GetZombie(zombieID);
+            var zombieData = GameManager.Instance?.GetZombie(zombieID);
             if (zombieData == null) return false;
             
             // Add spawn validation logic

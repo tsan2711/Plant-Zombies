@@ -9,7 +9,7 @@ namespace PvZ.Zombies
         public static ZombiePool Instance { get; private set; }
         
         [Header("Pool Settings")]
-        [SerializeField] private int initialPoolSize = 30;
+        [SerializeField] private int initialPoolSize = 100;
         [SerializeField] private int maxPoolSize = 100;
         [SerializeField] private bool allowPoolExpansion = true;
         [SerializeField] private Transform poolParent;
@@ -181,7 +181,8 @@ namespace PvZ.Zombies
             activeZombies[zombieID] = new List<ZombieController>();
             
             // Pre-populate pool with some instances
-            int prewarmCount = Mathf.Min(initialPoolSize / 10, 3); // Start with smaller number for zombies
+            int prewarmCount = Mathf.Min(initialPoolSize / 3, 10); // Create more zombies for better performance
+            
             for (int i = 0; i < prewarmCount; i++)
             {
                 CreateNewZombie(zombieData);

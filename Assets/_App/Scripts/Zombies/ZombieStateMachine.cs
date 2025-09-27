@@ -134,7 +134,7 @@ namespace PvZ.Zombies
             
             eatTimer += Time.deltaTime;
             
-            if (eatTimer >= 1f / zombie.ZombieData.eatSpeed)
+            if (eatTimer >= 1f) // Default eat speed: 1 attack per second
             {
                 // Deal damage to plant
                 nearbyPlant.TakeDamage(zombie.ZombieData.damage, zombie);
@@ -162,12 +162,9 @@ namespace PvZ.Zombies
         
         public void Update(ZombieController zombie)
         {
-            // Only for zombies with projectiles
-            if (zombie.ZombieData.projectileData == null)
-            {
-                zombie.StateMachine.ChangeState(ZombieState.Walking);
-                return;
-            }
+            // Projectile system simplified - switch to melee combat
+            zombie.StateMachine.ChangeState(ZombieState.Eating);
+            return;
             
             var target = zombie.FindAttackTarget();
             if (target == null)
@@ -178,7 +175,7 @@ namespace PvZ.Zombies
             
             attackTimer += Time.deltaTime;
             
-            if (attackTimer >= 1f / zombie.ZombieData.attackSpeed)
+            if (attackTimer >= 1f) // Default attack speed: 1 attack per second
             {
                 zombie.LaunchProjectile(target);
                 attackTimer = 0f;

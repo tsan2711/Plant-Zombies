@@ -12,13 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e14d2e4dbd850475e97f6aa6e540bc24, type: 3}
   m_Name: LevelConfig
   m_EditorClassIdentifier: 
-  levelID: 1
-  levelName: 
-  levelIndex: 0
+  stage: 0
   waves:
   - {fileID: 11400000, guid: 10fa2ed6bb707430a8820bdf1fd0022c, type: 2}
   - {fileID: 11400000, guid: c049a95b0095044679bf64ba4f47eb4a, type: 2}
   - {fileID: 11400000, guid: 4a47c8d44061c4bd2983a74e198ecb20, type: 2}
-  timeBetweenWaves: 15
-  availablePlants: []
+  timeBetweenWaves: 5
   startingSun: 50

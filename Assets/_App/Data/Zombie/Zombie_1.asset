@@ -12,33 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb95a35efbfce41f3a8eee8f263c1dea, type: 3}
   m_Name: Zombie_1
   m_EditorClassIdentifier: 
-  zombieID: 0
-  displayName: 
-  description: 
-  prefab: {fileID: 0}
+  zombieID: 1
+  displayName: hehe
+  prefab: {fileID: 7563313667108546020, guid: e267be854d390413c9fb5b9dda6c8037, type: 3}
   icon: {fileID: 0}
-  moveSpeed: 0
-  eatSpeed: 0
-  movementType: 0
   health: 1000
+  moveSpeed: 0.5
   damage: 0
-  attackRange: 0
-  attackSpeed: 0
   zombieType: 0
-  abilities: []
-  projectileData: {fileID: 0}
-  pointValue: 0
-  sunDropChance: 0
-  sunDropAmount: 25
-  groanSounds: []
-  attackSound: {fileID: 0}
-  deathSound: {fileID: 0}
-  eatSound: {fileID: 0}
-  animatorController: {fileID: 0}
-  canClimbLadders: 0
-  canJumpOverPlants: 0
-  canDigUnderground: 0
-  canFly: 0
-  spawnWeight: 1
   minWaveToAppear: 1
   isBossZombie: 0

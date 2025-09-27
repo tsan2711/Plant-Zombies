@@ -16,8 +16,8 @@ MonoBehaviour:
   displayName: PeaShooter
   description: 
   icon: {fileID: 0}
-  prefab: {fileID: 6713965549644955237, guid: 6b64c3fd530eb43878d120f527eec44d, type: 3}
-  cost: 0
+  prefab: {fileID: 4157129690979562326, guid: 37efdb74f6f634d7b8ed70703c7da527, type: 3}
+  cost: 1
   health: 100
   damage: 10
   attackSpeed: 3

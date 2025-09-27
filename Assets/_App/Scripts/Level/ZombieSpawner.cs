@@ -17,13 +17,14 @@ namespace PvZ.Level
 
         [Header("Spawn Limits")]
         [SerializeField] private int maxConcurrentZombies = 20;
-        [SerializeField] private float minSpawnInterval = 1f;
+        [SerializeField] private float minSpawnInterval = 0.5f; // Reduced from 1f to spawn faster
 
         // Current state
         private LevelConfiguration currentLevel;
         private WaveData currentWave;
         private int currentWaveIndex = 0;
         private bool isSpawning = false;
+        private bool hasStartedSpawning = false; // Track if we've actually started spawning zombies
         private List<GameObject> activeZombies;
         private Coroutine spawnCoroutine;
         private EntityManager entityManager;
@@ -53,7 +54,10 @@ namespace PvZ.Level
 
         #region Initialization
 
-        private void InitializeSpawner() => activeZombies = new List<GameObject>();
+        private void InitializeSpawner() 
+        {
+            activeZombies = new List<GameObject>();
+        }
 
         #endregion
 
@@ -66,6 +70,7 @@ namespace PvZ.Level
 
             currentLevel = levelConfig;
             currentWaveIndex = 0;
+            hasStartedSpawning = false; // Reset spawn flag
 
             PrewarmZombiePools();
 
@@ -80,13 +85,14 @@ namespace PvZ.Level
             }
 
             currentWave = currentLevel.waves[currentWaveIndex];
+            hasStartedSpawning = false; // Reset spawn flag for new wave
+            isSpawning = true; // Set spawning immediately to prevent premature completion
 
             if (currentWave == null)
             {
                 Debug.LogError($"[ZombieSpawner] Wave {currentWaveIndex} is null!");
                 return;
             }
-
 
             // Start spawning after a delay
             StartCoroutine(StartWaveWithDelay());
@@ -118,7 +124,7 @@ namespace PvZ.Level
         {
             yield return new WaitForSeconds(currentLevel.timeBetweenWaves);
 
-            isSpawning = true;
+            // isSpawning already set to true in StartNextWave()
             spawnCoroutine = StartCoroutine(SpawnWave());
         }
 
@@ -136,6 +142,8 @@ namespace PvZ.Level
             // Spawn zombies with intervals
             foreach (var zombieData in spawnQueue)
             {
+                hasStartedSpawning = true; // Mark that we've started spawning
+                
                 // Wait for spawn conditions
                 yield return new WaitUntil(() => CanSpawnZombie());
 
@@ -146,10 +154,11 @@ namespace PvZ.Level
                 yield return new WaitForSeconds(spawnInterval);
             }
 
-            // Wait for all zombies to be defeated
-            yield return new WaitUntil(() => activeZombies.Count == 0);
+            // Mark spawning as complete
+            Debug.Log($"[DEBUG] Finished spawning all zombies in wave. Setting isSpawning = false");
+            isSpawning = false;
 
-            CompleteCurrentWave();
+            // Wave completion is now handled automatically when zombies die
         }
 
         private List<ZombieData> CreateSpawnQueue()
@@ -241,6 +250,9 @@ namespace PvZ.Level
             // Add to active zombies list
             activeZombies.Add(zombieController.gameObject);
 
+            // Subscribe to zombie death event
+            zombieController.OnZombieDied += () => OnZombieDied(zombieController.gameObject);
+
             // Register with entity manager
             entityManager?.RegisterEntity(zombieController);
         }
@@ -248,14 +260,30 @@ namespace PvZ.Level
 
         private void OnZombieDied(GameObject zombie)
         {
+            Debug.Log($"[DEBUG] OnZombieDied called for {zombie.name}");
+            
             if (activeZombies.Contains(zombie))
             {
                 activeZombies.Remove(zombie);
+                Debug.Log($"[DEBUG] Removed zombie from active list. Remaining: {activeZombies.Count}");
+                
+                // Check if wave should complete
+                Debug.Log($"[DEBUG] Checking wave completion: isSpawning={isSpawning}, hasStartedSpawning={hasStartedSpawning}, activeZombies={activeZombies.Count}");
+                if (!isSpawning && hasStartedSpawning && activeZombies.Count == 0)
+                {
+                    Debug.Log($"[DEBUG] Wave completion conditions met! Completing wave {currentWaveIndex + 1}");
+                    CompleteCurrentWave();
+                }
+                else
+                {
+                    Debug.Log($"[DEBUG] Wave completion conditions NOT met");
+                }
             }
         }
 
         private void CompleteCurrentWave()
         {
+            Debug.Log($"[DEBUG] CompleteCurrentWave called for wave {currentWaveIndex + 1}");
             isSpawning = false;
 
 
@@ -264,17 +292,21 @@ namespace PvZ.Level
             // Start next wave or complete level
             if (currentWaveIndex < currentLevel.waves.Length)
             {
+                Debug.Log($"[DEBUG] Starting next wave {currentWaveIndex + 1}");
                 StartCoroutine(DelayedNextWave());
             }
             else
             {
+                Debug.Log($"[DEBUG] All waves completed!");
                 // All waves completed - LevelManager will detect this via GetCurrentWaveIndex
             }
         }
 
         private IEnumerator DelayedNextWave()
         {
+            Debug.Log($"[DEBUG] Waiting {currentLevel.timeBetweenWaves}s before next wave");
             yield return new WaitForSeconds(currentLevel.timeBetweenWaves);
+            Debug.Log($"[DEBUG] Starting next wave after delay");
             StartNextWave();
         }
 
@@ -315,21 +347,18 @@ namespace PvZ.Level
         {
             int totalSpawns = 0;
 
-            // Count total spawns of this zombie type across all waves
             foreach (var wave in currentLevel.waves)
             {
                 if (wave?.zombieSpawns == null) continue;
 
                 foreach (var spawnData in wave.zombieSpawns)
                 {
+                    Debug.Log($"Prewarming {zombieData.zombieID} {spawnData.count} times");
                     if (spawnData?.zombieData == zombieData)
-                    {
                         totalSpawns += spawnData.count;
-                    }
                 }
             }
 
-            // Prewarm with 25% of total spawns, minimum 2, maximum 10
             return Mathf.Clamp(Mathf.CeilToInt(totalSpawns * 0.25f), 2, 10);
         }
 
@@ -391,7 +420,7 @@ namespace PvZ.Level
         public int GetActiveZombieCount() => activeZombies.Count;
         public bool IsSpawning() => isSpawning;
         public WaveData GetCurrentWave() => currentWave;
-        public bool IsWaveCompleted() => !isSpawning && activeZombies.Count == 0;
+        public bool IsWaveCompleted() => !isSpawning && (!hasStartedSpawning || activeZombies.Count == 0);
         public bool AreAllWavesCompleted() => currentWaveIndex >= GetTotalWaves();
 
         #endregion

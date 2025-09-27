@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waveNumber: 0
   startDelay: 5
-  duration: 60
+  duration: 10
   zombieSpawns:
   - zombieData: {fileID: 11400000, guid: 25f6ceae3a9184eee997b6c7178c36e1, type: 2}
-    count: 10
+    count: 2
     spawnProbability: 1
   spawnRate: 1
   completionCondition: 0

@@ -14,10 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allPlants:
   - {fileID: 11400000, guid: cb2114ea8ebe2467eb30db4ee640f5e4, type: 2}
+  - {fileID: 11400000, guid: 146947560178b44f3a9734a46a857dd3, type: 2}
+  - {fileID: 11400000, guid: 307553a35d5184310a4570f0b47e7ee9, type: 2}
+  - {fileID: 11400000, guid: db85d8f9a8d1744bfb2643c2760f8428, type: 2}
+  - {fileID: 11400000, guid: fa7f87008dd494508901df9ca95ecfe9, type: 2}
+  - {fileID: 11400000, guid: ee1c86e453c73497db2354d4dcedf9fa, type: 2}
+  - {fileID: 11400000, guid: 3a22eb79b00ee41ed8510973244f3493, type: 2}
   allZombies:
   - {fileID: 11400000, guid: 25f6ceae3a9184eee997b6c7178c36e1, type: 2}
   allProjectiles:
   - {fileID: 11400000, guid: ff87e641ef27a4209af6284019adefe8, type: 2}
+  - {fileID: 11400000, guid: 6189645f2e8414e39b8dc0d4f390ed06, type: 2}
+  - {fileID: 11400000, guid: daa69333ac3cc4b36902afe530d0b486, type: 2}
+  - {fileID: 11400000, guid: 0fc8cd209ada54e0cb4304340614dc3a, type: 2}
+  - {fileID: 11400000, guid: 498fa19aa02fe429f9cc47d9823376f6, type: 2}
+  - {fileID: 11400000, guid: 1a6f329b97e204c06a6e5161f257bea9, type: 2}
   allPlantAbilities: []
   allZombieAbilities: []
   allProjectileEffects: []
