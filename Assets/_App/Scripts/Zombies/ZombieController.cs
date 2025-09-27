@@ -246,7 +246,6 @@ namespace PvZ.Zombies
         {
             if (!IsActive) return;
             
-            Debug.Log($"[DEBUG] {name} took {damage} damage. Health: {Health} -> {Health - damage}");
             Health -= damage;
             Health = Mathf.Max(0, Health);
             
@@ -255,7 +254,6 @@ namespace PvZ.Zombies
             
             if (Health <= 0)
             {
-                Debug.Log($"[DEBUG] {name} health reached 0, calling Die()");
                 Die();
             }
         }
@@ -265,12 +263,10 @@ namespace PvZ.Zombies
         {
             if (!IsActive) return;
             
-            Debug.Log($"[DEBUG] Zombie {name} is dying!");
             IsActive = false;
             StateMachine.ChangeState(ZombieState.Dying);
             
             // Trigger death event for spawner
-            Debug.Log($"[DEBUG] Invoking OnZombieDied event for {name}");
             OnZombieDied?.Invoke();
         }
         
